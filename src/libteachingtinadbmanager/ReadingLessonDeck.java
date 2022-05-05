@@ -41,11 +41,11 @@ public class ReadingLessonDeck extends FlashcardGroupDeck {
     public static String SPELLING_MODE = "#SPELLING#";
     public static String SENTENCE_MODE = "#SENTENCE#";
 
-    final static int INDEX_CARD_MODE          = 0;
-    final static int INDEX_TEXT               = 1;
-    final static int INDEX_AUDIO              = 2;
-    final static int INDEX_IMAGE              = 3;
-    final static int INDEX_READ_ALONG_TIMINGS = 4;
+    public final static int INDEX_CARD_MODE          = 0;
+    public final static int INDEX_TEXT               = 1;
+    public final static int INDEX_AUDIO              = 2;
+    public final static int INDEX_IMAGE              = 3;
+    public final static int INDEX_READ_ALONG_TIMINGS = 4;
 
     public static ArrayList<String> getCardText( Card c ) {
         ArrayList<String> list = CardDBTagManager.makeStringAList( c.getContent(INDEX_TEXT) );

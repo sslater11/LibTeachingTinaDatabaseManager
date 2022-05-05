@@ -44,7 +44,7 @@ public class CardsGroup {
 	 * @param group_name
 	 * @param settings
 	 */
-	CardsGroup(String group_name, DeckSettings settings) {
+	public CardsGroup(String group_name, DeckSettings settings) {
 		settings = settings;
 		setName( group_name );
 		setBoxNum();

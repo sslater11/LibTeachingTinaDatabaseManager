@@ -76,7 +76,7 @@ public class Card {
 		this(line.split(delimiter), s, g);
 	}
 	
-	Card ( String line, DeckSettings s, CardsGroup g ) {
+	public Card ( String line, DeckSettings s, CardsGroup g ) {
 		this(line, "\t", s, g);
 	}
 	

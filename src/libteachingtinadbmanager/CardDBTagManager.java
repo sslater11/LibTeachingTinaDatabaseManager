@@ -196,15 +196,6 @@ public class CardDBTagManager {
 		return getTagsEndingIndex(str, INDEX_IMAGE_TAG);
 	}
 
-	/**
-	 * Takes an image tag, and strips the tag, to return just the filename.
-	 * @param str as an image tag e.g. "<img:file.jpg/>"
-	 * @return Will return null if the string does not contain a proper image tag including a closing brace.
-	 * Returns a string with just the filename.
-	 */
-	public static String getImageFilename( String str ) {
-		return getTagsContents(str, INDEX_IMAGE_TAG);
-	}
 	
 	
 	public static boolean hasBRTag( String str ) {
@@ -235,9 +226,19 @@ public class CardDBTagManager {
 	}
 	
 	/**
-	 * Takes a read-along-timing tag, and strips the tag to return just the filename.
-	 * @param str as an audio tag e.g. "<read-along-timing:timing.txt/>"
+	 * Takes an image tag, and strips the tag, to return just the filename.
+	 * @param str as an image tag e.g. "<img:"file.jpg"/>"
 	 * @return Will return null if the string does not contain a proper image tag including a closing brace.
+	 * Returns a string with just the filename.
+	 */
+	public static String getImageFilename( String str ) {
+		return getTagsContents(str, INDEX_IMAGE_TAG);
+	}
+
+	/**
+	 * Takes a read-along-timing tag, and strips the tag to return just the filename.
+	 * @param str as a read along timing tag e.g. "<readalongtiming:"timing.txt"/>"
+	 * @return Will return null if the string does not contain a proper read along timings tag including a closing brace.
 	 * Returns a string with just the filename.
 	 */
 	public static String getReadAlongTimingsFilename( String str ) {
@@ -246,8 +247,8 @@ public class CardDBTagManager {
 
 	/**
 	 * Takes an audio tag, and strips the tag to return just the filename.
-	 * @param str as an audio tag e.g. "<audio:file.jpg/>"
-	 * @return Will return null if the string does not contain a proper image tag including a closing brace.
+	 * @param str as an audio tag e.g. "<audio:"file.jpg"/>"
+	 * @return Will return null if the string does not contain a proper audio tag including a closing brace.
 	 * Returns a string with just the filename.
 	 */
 	public static String getAudioFilename( String str ) {
@@ -275,7 +276,7 @@ public class CardDBTagManager {
 	 * Will convert a question or answer string into an ArrayList
 	 * It will split the string at any image tag found.
 	 * @param str as a question or answer string
-	 * @return a String ArrayList.<br>
+	 * @return a String ArrayList, or an empty list if nothing found.<br>
 	 * e.g. question text&lt;image:pic.jpg&gt;image above this.<br>
 	 * becomes:<br>
 	 * question text,<br> 

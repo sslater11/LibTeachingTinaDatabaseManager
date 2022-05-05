@@ -40,6 +40,7 @@ public class TextEditorDBManager {
 	public static String VOWEL_PAIRS                  = "Vowel Pairs";
 	public static String SENTENCE                     = "Sentence";
 
+	enum CardType { isSound, isWord, isSentence };
 	//public static final String HEADING_CONSONANT_PAIRS              = "# Consonant Pairs:";
 	//public static final String HEADING_CONSONANT_GROUPS             = "# Consonant Groups:";
 	//public static final String HEADING_VOWEL_CONSONANT_PAIRS        = "# Vowel Consonant Pairs:";
@@ -208,18 +209,24 @@ public class TextEditorDBManager {
 	//		loadDBFile();
 	//}
 	
+	/**
+	 * Will get the word or sound from each card and make a List of Strings.
+	 * @param list
+	 * @return
+	 */
 	public static List<String> cardListToStringList(List<Card> list) {
 		List<String> str_list = new ArrayList<String>();
 		if( list != null ) {
 			for( Card i : list ) {
-				// The zero is for the card's first entry.
-				str_list.add( i.getContent( 0 ) );
+				// Add just the card's text field to our list.
+				str_list.add( i.getContent( ReadingLessonDeck.INDEX_TEXT ) );
 			}
 		}
 		
 		return str_list;
 	}
-	public static List<String> listToDBLines(List<String> list ) {
+
+	public static List<String> listToDBLines(List<String> list, CardType card_type, int reading_level ) {
 		List<String> final_output = new ArrayList<String>();
 		
 		for(int i = 0; i < list.size(); i++ ) {
@@ -227,7 +234,45 @@ public class TextEditorDBManager {
 			
 			String front_with_ignored_characters_removed = (new WordWithIndexes( front, 0, front.length() )).getWordWithIgnoredCharactersRemoved();
 
-			String back = "<audio:\"" + front_with_ignored_characters_removed + ".mp3\">";
+			String audio_directory = "";
+			String extra_empty_tags = "";
+			
+			String back = "";
+			
+			if( card_type == CardType.isSound ) {
+				audio_directory = "sounds/";
+				extra_empty_tags = "\t";
+				front = ReadingLessonDeck.READING_MODE + "\t" + front;
+				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">" + extra_empty_tags;
+
+			} else if ( card_type == CardType.isWord ) {
+				audio_directory = "words/";
+				extra_empty_tags = "\t";
+				front = ReadingLessonDeck.READING_MODE + "\t" + front;
+				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">" + extra_empty_tags;
+
+			} else if ( card_type == CardType.isSentence ) {
+				// Remove bad whitespace that would mess up our database file.
+				front = front.replaceAll("\n", "<br>" );
+				front = front.replaceAll("\t", " " );
+
+				audio_directory = "sentences/";
+				// The \t\t is to make an empty place for the 'image' and 'read along timing' tags.
+				extra_empty_tags = "\t\t";
+				front = ReadingLessonDeck.SENTENCE_MODE + "\t" + front;
+				
+				// Name to be Reading Lesson 001 - sentence 1.mp3
+				/*TODO: Make a way to increment the sentence file numbers automatically
+		 		* e.g.
+		 		* Reading Lesson 0001 - Sentence 1.mp3
+		 		* Reading Lesson 0001 - Sentence 2.mp3
+		 		* Reading Lesson 0001 - Sentence 3.mp3
+		 		* Reading Lesson 0001 - Sentence 4.mp3
+		 		*/
+				String filename = getFileNameWithoutExtension( reading_level );
+
+				back = "<audio:\"" + audio_directory + filename + " - Sentence.wav\">" + extra_empty_tags;
+			}
 			
 			String line = makeDBLine(front, back);
 			
@@ -251,47 +296,56 @@ public class TextEditorDBManager {
 		ArrayList<String> lines = new ArrayList<String>();
 		
 		lines.add( lineToDBGroupLine( TextEditorDBManager.CONSONANT_PAIRS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getConsonantPairs() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getConsonantPairs(), CardType.isSound, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.VOWEL_CONSONANT_PAIRS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getVowelConsonantPairs() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getVowelConsonantPairs(), CardType.isSound, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.VOWEL_PAIRS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getVowelPairs() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getVowelPairs(), CardType.isSound, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.CONSONANT_GROUPS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getConsonantGroups() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getConsonantGroups(), CardType.isSound, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.DOUBLE_CONSONANT_VOWEL_PAIRS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getDoubleConsonantVowelPairs() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getDoubleConsonantVowelPairs(), CardType.isSound, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.DOUBLE_VOWEL_CONSONANT_PAIRS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getDoubleVowelConsonantPairs() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getDoubleVowelConsonantPairs(), CardType.isSound, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.WORDS ) );
-		lines.addAll( TextEditorDBManager.listToDBLines( deck.getWords() ) );
+		lines.addAll( TextEditorDBManager.listToDBLines( deck.getWords(), CardType.isWord, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.SENTENCE ) );
-		// Sentence has a different method to convert it since it's a string.
-		lines.add(sentenceToDBLine(deck.getSentence(), deck.getLevel()));
+		// Convert the sentence into a list and add it to the database.
+		// We convert to a list as I may add multiple sentences for a single reading lesson later on.
+		// Plus it keeps the code to format a line all in one function.
+		List<String> sentence_list = new ArrayList<String>();
+		sentence_list.add( deck.getSentence() );
+		lines.addAll(TextEditorDBManager.listToDBLines(sentence_list, CardType.isSentence, deck.getLevel() ));
 		
 		return lines;
 	}
 	
+	/**
+	 * Returns the string "Reading Lesson 0001" if we pass the number 1 to it.
+	 * @param reading_level
+	 * @return
+	 */
 	public static String getFileNameWithoutExtension( int reading_level ) {
 		String str_reading_level = "";
 		if( reading_level < 10 ) {
@@ -341,29 +395,6 @@ public class TextEditorDBManager {
 			
 			return CardDBManager.isDBLineBlank( arr_line );
 		}
-	}
-	
-	public static String sentenceToDBLine( String sentence, int reading_level ) {
-		//name to be Reading Lesson 001 - sentence 1.mp3
-		/*TODO: Make a way to increment the sentance file numbers automatically
-		 * e.g.
-		 * Reading Lesson 0001 - Sentence 1.mp3
-		 * Reading Lesson 0001 - Sentence 2.mp3
-		 * Reading Lesson 0001 - Sentence 3.mp3
-		 * Reading Lesson 0001 - Sentence 4.mp3
-		 */
-		
-		// Remove bad whitespace that would mess up our database file.
-		sentence = sentence.replaceAll("\n", "<br>" );
-		sentence = sentence.replaceAll("\t", " " );
-		
-		String filename = getFileNameWithoutExtension( reading_level );
-
-		String sentence_audio_filename = "<audio:\"" + filename + " - Sentence.mp3\">";
-		
-		String line = makeDBLine("#SENTENCE#" + sentence, sentence_audio_filename);
-		
-		return line;
 	}
 	
 	public static String makeDBLine(String front, String back) {
