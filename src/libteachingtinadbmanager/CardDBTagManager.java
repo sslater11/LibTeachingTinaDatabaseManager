@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 public class CardDBTagManager {
 	private static String version = "1.1";
 	
-	private static Pattern p_br_tag   = Pattern.compile("< *(br|BR|Br|bR)");
+	private static Pattern p_br_tag   = Pattern.compile("< *(br)", Pattern.CASE_INSENSITIVE);
 	/* This regex pattern will find these tags:
 	 *      <img:"
 	 *      <IMG:"
@@ -35,11 +35,11 @@ public class CardDBTagManager {
 	 *      <   img  :  "
 	 *      < img:"
 	 */
-	private static Pattern p_img_tag   = Pattern.compile("< *(img|IMG|image|IMAGE) *: *\"");
-	private static Pattern p_read_along_timing_tag   = Pattern.compile("< *(rat|RAT|readalongtiming|READALONGTIMING) *: *\"");
+	private static Pattern p_img_tag   = Pattern.compile( "< *(img|image) *: *\"", Pattern.CASE_INSENSITIVE );
+	private static Pattern p_read_along_timing_tag   = Pattern.compile( "< *(rat|readalongtiming|read\\--along\\-timing) *: *\"", Pattern.CASE_INSENSITIVE);
 
 	// Same as above, but with audio.
-	private static Pattern p_audio_tag = Pattern.compile("< *(audio|AUDIO|Audio) *: *\"");
+	private static Pattern p_audio_tag = Pattern.compile( "< *(audio|AUDIO) *: *\"", Pattern.CASE_INSENSITIVE );
 	
 	/* This regex pattern will find these tags:
 	 * <fontsize:
@@ -51,12 +51,7 @@ public class CardDBTagManager {
 	 * It also allows for zero or more spaces between the 'opening brace' and the letter 'f'.
 	 * It also allows for zero or more spaces between the 'e'             and the        'colon'
 	 */
-	private static Pattern p_font_size_tag = Pattern.compile("< *(font *size|FONT *SIZE|Font *Size|Font *size|font *Size) *: *\"");
-	
-	
-	
-	
-	
+	private static Pattern p_font_size_tag = Pattern.compile( "< *(font *size) *: *\"", Pattern.CASE_INSENSITIVE );
 	
 	/* This regex pattern will find these closing tags:
 	 * ">

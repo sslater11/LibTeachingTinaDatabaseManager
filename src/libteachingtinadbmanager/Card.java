@@ -10,6 +10,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 package libteachingtinadbmanager;
 
+import java.util.Arrays;
 import java.util.Date;
 
 public class Card {
@@ -322,12 +323,28 @@ public class Card {
 		return has_this_been_updated;
 	}
 	
-	public String getContent(int idx) {
-		if ( idx < contents.length ) {
-			return contents[idx];
+	public String getContent(int index) {
+		if ( index < contents.length ) {
+			return contents[ index ];
 		} else {
 			return "";
 		}
+	}
+	
+	public void setContent( int index, String new_content ) {
+		if( index > (contents.length -1) ) {
+			int old_array_length = contents.length;
+
+			// The array is too small, so make more elements and alter the one we want to set.
+			contents = Arrays.copyOf( contents, index+1 );
+
+			// Set any empty new strings to a blank string.
+			for( int i = old_array_length; i < index; i++ ) {
+				contents[i] = "";
+			}
+		}
+
+		contents[ index ] = new_content;
 	}
 	
 	public String toString() {

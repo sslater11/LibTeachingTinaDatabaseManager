@@ -235,21 +235,18 @@ public class TextEditorDBManager {
 			String front_with_ignored_characters_removed = (new WordWithIndexes( front, 0, front.length() )).getWordWithIgnoredCharactersRemoved();
 
 			String audio_directory = "";
-			String extra_empty_tags = "";
 			
 			String back = "";
 			
 			if( card_type == CardType.isSound ) {
 				audio_directory = "sounds/";
-				extra_empty_tags = "\t";
 				front = ReadingLessonDeck.READING_MODE + "\t" + front;
-				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">" + extra_empty_tags;
+				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">";
 
 			} else if ( card_type == CardType.isWord ) {
 				audio_directory = "words/";
-				extra_empty_tags = "\t";
 				front = ReadingLessonDeck.READING_MODE + "\t" + front;
-				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">" + extra_empty_tags;
+				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">";
 
 			} else if ( card_type == CardType.isSentence ) {
 				// Remove bad whitespace that would mess up our database file.
@@ -258,7 +255,6 @@ public class TextEditorDBManager {
 
 				audio_directory = "sentences/";
 				// The \t\t is to make an empty place for the 'image' and 'read along timing' tags.
-				extra_empty_tags = "\t\t";
 				front = ReadingLessonDeck.SENTENCE_MODE + "\t" + front;
 				
 				// Name to be Reading Lesson 001 - sentence 1.mp3
@@ -271,7 +267,7 @@ public class TextEditorDBManager {
 		 		*/
 				String filename = getFileNameWithoutExtension( reading_level );
 
-				back = "<audio:\"" + audio_directory + filename + " - Sentence.wav\">" + extra_empty_tags;
+				back = "<audio:\"" + audio_directory + filename + " - Sentence.wav\">";
 			}
 			
 			String line = makeDBLine(front, back);
