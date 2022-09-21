@@ -18,16 +18,16 @@ import java.io.File;
  * It's different, because the flashcard format has been changed.
  * Here's an example of the new DB File Layout.
  *     #spelling/reading	word/text	audio	image
- *     #15/02/2022	1.4	19:40:56	3	#spelling#	dog	<audio:spell-dog.mp3><audio:spell-dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *     #15/02/2022	1.4	19:40:56	3	#reading#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
+ *     #15/02/2022	1.4	19:40:56	3	#WORD#	#spelling_mode#	dog	<audio:spell-dog.mp3><audio:spell-dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
+ *     #15/02/2022	1.4	19:40:56	3	#WORD#	#reading_mode#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
  *
  *     Group	Words	15/02/2020	2.744	19:40:56	1
- *     15/02/2022	1.4	19:40:56	3	#spelling#	dog	<audio:spell-dog.mp3><audio:spell-dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *     15/02/2022	1.4	19:40:56	3	#reading#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
+ *     15/02/2022	1.4	19:40:56	3	#WORD#	#spelling_mode#	dog	<audio:spell-dog.mp3><audio:spell-dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
+ *     15/02/2022	1.4	19:40:56	3	#WORD#	#reading_mode#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
  *
  *     Group	Sentence	15/02/2020	2.744	19:40:56	1
- *     15/02/2022	1.4	19:40:56	3	#sentence#	this is a test	<audio:this-is-a-test.mp3>	<image:test.jpg>    <read-along-timing:timings.txt>
- *     15/02/2022	1.4	19:40:56	3	#reading#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
+ *     15/02/2022	1.4	19:40:56	3	#SENTENCE#	#sentence_mode#	this is a test	<audio:this-is-a-test.mp3>	<image:test.jpg>    <read-along-timing:timings.txt>
+ *     15/02/2022	1.4	19:40:56	3	#SENTENCE#	#sentence_mode#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
  *
  *
  * The line is split to this order - spelling/reading	word/text	audio	image
@@ -37,15 +37,20 @@ public class ReadingLessonDeck extends FlashcardGroupDeck {
         super(d, deck_file_path, s);
     }
 
-    public static String READING_MODE  = "#READING#";
-    public static String SPELLING_MODE = "#SPELLING#";
-    public static String SENTENCE_MODE = "#SENTENCE#";
+    public static String IS_WORD     = "#WORD#";
+    public static String IS_SENTENCE = "#SENTENCE#";
+    public static String IS_SOUND    = "#SOUND#";
 
-    public final static int INDEX_CARD_MODE          = 0;
-    public final static int INDEX_TEXT               = 1;
-    public final static int INDEX_AUDIO              = 2;
-    public final static int INDEX_IMAGE              = 3;
-    public final static int INDEX_READ_ALONG_TIMINGS = 4;
+    public static String READING_MODE  = "#READING_MODE#";
+    public static String SPELLING_MODE = "#SPELLING_MODE#";
+    public static String SENTENCE_MODE = "#SENTENCE_MODE#";
+
+    public final static int INDEX_WORD_SOUND_OR_SENTENCE = 0;
+    public final static int INDEX_CARD_MODE              = 1;
+    public final static int INDEX_TEXT                   = 2;
+    public final static int INDEX_AUDIO                  = 3;
+    public final static int INDEX_IMAGE                  = 4;
+    public final static int INDEX_READ_ALONG_TIMINGS     = 5;
 
     public static ArrayList<String> getCardText( Card c ) {
         ArrayList<String> list = CardDBTagManager.makeStringAList( c.getContent(INDEX_TEXT) );
@@ -64,7 +69,7 @@ public class ReadingLessonDeck extends FlashcardGroupDeck {
         return list;
     }
     public static boolean isCardReadingMode( Card c) {
-        String current_mode = c.getContent( 0 );
+        String current_mode = c.getContent( INDEX_CARD_MODE );
         if( current_mode.compareToIgnoreCase( READING_MODE ) == 0 ) {
             return true;
         } else {
@@ -82,6 +87,34 @@ public class ReadingLessonDeck extends FlashcardGroupDeck {
     public static boolean isCardSentenceMode( Card c) {
         String current_mode = c.getContent( INDEX_CARD_MODE  );
         if( current_mode.compareToIgnoreCase( SENTENCE_MODE ) == 0 ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    public static boolean isCardASentence( Card c) {
+        String current_mode = c.getContent( INDEX_WORD_SOUND_OR_SENTENCE );
+        if( current_mode.compareToIgnoreCase( IS_SENTENCE ) == 0 ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isCardAWord( Card c) {
+        String current_mode = c.getContent( INDEX_WORD_SOUND_OR_SENTENCE );
+        if( current_mode.compareToIgnoreCase( IS_WORD ) == 0 ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean isCardASound( Card c) {
+        String current_mode = c.getContent( INDEX_WORD_SOUND_OR_SENTENCE );
+        if( current_mode.compareToIgnoreCase( IS_SOUND ) == 0 ) {
             return true;
         } else {
             return false;

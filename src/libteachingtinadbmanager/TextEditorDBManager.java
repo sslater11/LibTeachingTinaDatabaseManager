@@ -90,7 +90,7 @@ public class TextEditorDBManager {
 		ArrayList<String> lines = new ArrayList<String>();
 		
 		// Open the file and read it into the ArrayList called 'lines'.
-
+		
 		try {
 			db = new Scanner(  db_file );
 			// Read in the database contents.
@@ -112,7 +112,7 @@ public class TextEditorDBManager {
 			System.out.println( "See the debug info below" );
 			e.printStackTrace();
 		}
-		
+
 
 		// Convert it all to a list of Card objects, and add them to the reading_deck.
 		ReadingLessonCreator reading_deck = new ReadingLessonCreator();
@@ -124,22 +124,22 @@ public class TextEditorDBManager {
 		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, VOWEL_CONSONANT_PAIRS);
 		reading_deck.setVowelConsonantPairs( cardListToStringList( list ) );
-	
+		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, CONSONANT_GROUPS);
 		reading_deck.setConsonantGroups( cardListToStringList( list ) );
-	
+		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, DOUBLE_CONSONANT_VOWEL_PAIRS);
 		reading_deck.setDoubleConsonantVowelPairs( cardListToStringList( list ) );
-	
+		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, DOUBLE_VOWEL_CONSONANT_PAIRS);
 		reading_deck.setDoubleVowelConsonantPairs( cardListToStringList( list ) );
-	
+		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, VOWEL_PAIRS);
 		reading_deck.setVowelPairs( cardListToStringList( list ) );
 		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, WORDS);
 		reading_deck.setWords( cardListToStringList( list ) );
-	
+		
 		list = CardDBManager.readDBGetGroup(db_file, deck_settings, SENTENCE);
 		if( list != null ) {
 			if( list.size() >= 1 ) {
@@ -234,40 +234,43 @@ public class TextEditorDBManager {
 			
 			String front_with_ignored_characters_removed = (new WordWithIndexes( front, 0, front.length() )).getWordWithIgnoredCharactersRemoved();
 
-			String audio_directory = "";
+			String sub_directory = "";
 			
 			String back = "";
 			
 			if( card_type == CardType.isSound ) {
-				audio_directory = "sounds/";
-				front = ReadingLessonDeck.READING_MODE + "\t" + front;
-				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">";
+				sub_directory = "sounds/";
+				front = ReadingLessonDeck.IS_SOUND + "\t" + ReadingLessonDeck.READING_MODE + "\t" + front;
+				back = "<audio:\"" + sub_directory + front_with_ignored_characters_removed + ".wav\">";
 
 			} else if ( card_type == CardType.isWord ) {
-				audio_directory = "words/";
-				front = ReadingLessonDeck.READING_MODE + "\t" + front;
-				back = "<audio:\"" + audio_directory + front_with_ignored_characters_removed + ".wav\">";
+				sub_directory = "words/";
+				front = ReadingLessonDeck.IS_WORD + "\t" + ReadingLessonDeck.READING_MODE + "\t" + front;
+				back = "<audio:\"" + sub_directory + front_with_ignored_characters_removed + ".wav\">";
+				back += "\t<image:\"" + sub_directory + front_with_ignored_characters_removed + ".jpg\">";
 
 			} else if ( card_type == CardType.isSentence ) {
 				// Remove bad whitespace that would mess up our database file.
 				front = front.replaceAll("\n", "<br>" );
 				front = front.replaceAll("\t", " " );
 
-				audio_directory = "sentences/";
+				sub_directory = "sentences/";
 				// The \t\t is to make an empty place for the 'image' and 'read along timing' tags.
-				front = ReadingLessonDeck.SENTENCE_MODE + "\t" + front;
+				front = ReadingLessonDeck.IS_SENTENCE + "\t" + ReadingLessonDeck.SENTENCE_MODE + "\t" + front;
 				
-				// Name to be Reading Lesson 001 - sentence 1.mp3
+				// Name to be Reading Lesson 001 - Sentence.mp3
 				/*TODO: Make a way to increment the sentence file numbers automatically
 		 		* e.g.
-		 		* Reading Lesson 0001 - Sentence 1.mp3
-		 		* Reading Lesson 0001 - Sentence 2.mp3
-		 		* Reading Lesson 0001 - Sentence 3.mp3
-		 		* Reading Lesson 0001 - Sentence 4.mp3
+		 		* Reading Lesson 0001 - Sentence.mp3
+		 		* Reading Lesson 0001 - Sentence_2.mp3
+		 		* Reading Lesson 0001 - Sentence_3.mp3
+		 		* Reading Lesson 0001 - Sentence_4.mp3
 		 		*/
 				String filename = getFileNameWithoutExtension( reading_level );
 
-				back = "<audio:\"" + audio_directory + filename + " - Sentence.wav\">";
+				back = "<audio:\"" + sub_directory + filename + " - Sentence.wav\">";
+				back += "\t<image:\"" + sub_directory + filename + ".jpg\">";
+				back += "\t<read-along-timing:\"" + sub_directory + filename + ".timing\">";
 			}
 			
 			String line = makeDBLine(front, back);
@@ -358,7 +361,7 @@ public class TextEditorDBManager {
 		}
 		return "Reading Lesson " + str_reading_level;
 	}
-
+	
 	public static String getFileName( int reading_level ) {
 		return getFileNameWithoutExtension( reading_level ) + ".txt";
 	}
@@ -424,25 +427,25 @@ public class TextEditorDBManager {
 	}
 
 	//public ArrayList<String> getConsonantPairs() {
-	//	return getLinesContentByHeading( HEADING_CONSONANT_PAIRS );                                                                 
+	//	return getLinesContentByHeading( HEADING_CONSONANT_PAIRS );
 	//}
 	//public ArrayList<String> getConsonantGroups() {
-	//	return getLinesContentByHeading( HEADING_CONSONANT_GROUPS );                                                                 
+	//	return getLinesContentByHeading( HEADING_CONSONANT_GROUPS );
 	//}
 	//public ArrayList<String> getVowelConsonantPairs() {
-	//	return getLinesContentByHeading( HEADING_VOWEL_CONSONANT_PAIRS );                                                                 
+	//	return getLinesContentByHeading( HEADING_VOWEL_CONSONANT_PAIRS );
 	//}
 	//public ArrayList<String> getVowelPairs() {
-	//	return getLinesContentByHeading( HEADING_VOWEL_PAIRS );                                                                 
+	//	return getLinesContentByHeading( HEADING_VOWEL_PAIRS );
 	//}
 	//public ArrayList<String> getDoubleConsonantVowelPairs() {
-	//	return getLinesContentByHeading( HEADING_DOUBLE_CONSONANT_VOWEL_PAIRS );                                                                 
+	//	return getLinesContentByHeading( HEADING_DOUBLE_CONSONANT_VOWEL_PAIRS );
 	//}
 	//public ArrayList<String> getDoubleVowelConsonantPairs() {
-	//	return getLinesContentByHeading( HEADING_DOUBLE_VOWEL_CONSONANT_PAIRS );                                                                 
+	//	return getLinesContentByHeading( HEADING_DOUBLE_VOWEL_CONSONANT_PAIRS );
 	//}
 	//public ArrayList<String> getWords() {
-	//	return getLinesContentByHeading( HEADING_WORDS );                                                                 
+	//	return getLinesContentByHeading( HEADING_WORDS );
 	//}
 	//public String getSentence() {
 	//	String str ="";
@@ -474,7 +477,7 @@ public class TextEditorDBManager {
 	 * 01/01/2018	1	00:00:00	0	th	<audio:"th.mp3">
 	 * 01/01/2018	1	00:00:00	0	sh	<audio:"sh.mp3">
 	 * 01/01/2018	1	00:00:00	0	ts	<audio:"ts.mp3">
-	 * 
+	 *
 	 * Group	Words	17/07/2021	1.0	00:00:00	0
 	 * 01/01/2018	1	00:00:00	0	the	<audio:"the.mp3">
 	 * 01/01/2018	1	00:00:00	0	cat	<audio:"cat.mp3">

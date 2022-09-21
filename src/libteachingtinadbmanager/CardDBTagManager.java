@@ -36,7 +36,7 @@ public class CardDBTagManager {
 	 *      < img:"
 	 */
 	private static Pattern p_img_tag   = Pattern.compile( "< *(img|image) *: *\"", Pattern.CASE_INSENSITIVE );
-	private static Pattern p_read_along_timing_tag   = Pattern.compile( "< *(rat|readalongtiming|read\\--along\\-timing) *: *\"", Pattern.CASE_INSENSITIVE);
+	private static Pattern p_read_along_timing_tag   = Pattern.compile( "< *(rat|readalongtiming|read\\-along\\-timing) *: *\"", Pattern.CASE_INSENSITIVE);
 
 	// Same as above, but with audio.
 	private static Pattern p_audio_tag = Pattern.compile( "< *(audio|AUDIO) *: *\"", Pattern.CASE_INSENSITIVE );
