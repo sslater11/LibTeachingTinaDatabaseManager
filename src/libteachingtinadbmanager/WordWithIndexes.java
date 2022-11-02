@@ -22,7 +22,7 @@ public class WordWithIndexes {
 	private int starting_index;
 	private int ending_index;
 
-	WordWithIndexes( String word, int starting_index, int ending_index ) {
+	public WordWithIndexes( String word, int starting_index, int ending_index ) {
 		this.word = word;
 		this.starting_index = starting_index;
 		this.ending_index = ending_index;

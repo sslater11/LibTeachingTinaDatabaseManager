@@ -13,12 +13,18 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
 import libteachingtinadbmanager.*;
+import libteachingtinadbmanager.sqlite_db.SQLiteReadingLessonHandler;
 
 
 // TODO: make this class only contain static methods.
@@ -36,7 +42,8 @@ public class TextEditorDBManager {
 	public static String CONSONANT_GROUPS             = "Consonant Groups";
 	public static String DOUBLE_CONSONANT_VOWEL_PAIRS = "Double Consonant Vowel Pairs";
 	public static String DOUBLE_VOWEL_CONSONANT_PAIRS = "Double Vowel Consonant Pairs";
-	public static String WORDS                        = "Words";
+	public static String WORD                         = "Word";
+	public static String SOUND                        = "Sound";
 	public static String VOWEL_PAIRS                  = "Vowel Pairs";
 	public static String SENTENCE                     = "Sentence";
 
@@ -70,145 +77,51 @@ public class TextEditorDBManager {
 	//		loadDBFile();
 	//}
 	
-	public static ReadingLessonCreator readDBFile( File db_file, DeckSettings deck_settings) {
-		/*
-		 * Database file layout
-		 * All spaces separated with a tab. Even between the sum numbers and operator.
-		 * The cards are the last thing to input, this allows the array to have any amount of fields for the card.
-		 *
-		 *    +--------------+-------+------------+----------+-----------+
-		 *    |              |       |            |  Daily   |           |
-		 *    |              |  Box  |  Review    |  Review  |           |
-		 *    |  Date        |  Num  |  Time      |  Count   |  Cards    |
-		 *    +--------------+-------+------------+----------+---+---+---+
-		 *    |  29/10/2013  |  4    |  00:00:00  |  1       | 1 | + | 2 |
-		 *    |  29/10/2013  |  4    |  00:00:00  |  1       | 5 | + | 3 |
-		 *    +--------------+-------+------------+----------+-----------+
-		 *
-		 */
-		Scanner db;
-		ArrayList<String> lines = new ArrayList<String>();
-		
-		// Open the file and read it into the ArrayList called 'lines'.
-		
-		try {
-			db = new Scanner(  db_file );
-			// Read in the database contents.
-			while ( db.hasNextLine() ) {
-				// Get 1 line of input
-				String line = db.nextLine();
-				
-				if( ! isDBLineBlank(line) ) {
-					lines.add( line );
-				}
-			}
-			
-			db.close();
-		}
-		// Catch for when the file isn't opened.
-		catch ( Exception e ) {
-			System.out.println( "Could not find the database file: " + db_file );
-			System.out.println( "This could be a problem with another type of exception though.");
-			System.out.println( "See the debug info below" );
-			e.printStackTrace();
-		}
-
-
-		// Convert it all to a list of Card objects, and add them to the reading_deck.
+	public static ReadingLessonCreator readSQLiteDB( Connection db_connection, String sqlite_table_name , DeckSettings deck_settings) throws SQLException {
 		ReadingLessonCreator reading_deck = new ReadingLessonCreator();
 		
-		ArrayList<Card> list;
+		String sql_select_sentences           = "SELECT * FROM reading_lessons WHERE sound_word_or_sentence=\"" + SENTENCE + "\";";
+		String sql_select_words               = "SELECT * FROM reading_lessons WHERE sound_word_or_sentence=\"" + WORD     + "\";";
+		String sql_select_words_reading_level = "SELECT reading_lesson_level FROM reading_lessons WHERE sound_word_or_sentence=\"" + WORD     + "\";";
+		String sql_select_consonant_pairs              = "SELECT * FROM reading_lessons WHERE sound_type=\"" + CONSONANT_PAIRS              + "\";";
+		String sql_select_vowel_consonant_pairs        = "SELECT * FROM reading_lessons WHERE sound_type=\"" + VOWEL_CONSONANT_PAIRS        + "\";";
+		String sql_select_consonant_groups             = "SELECT * FROM reading_lessons WHERE sound_type=\"" + CONSONANT_GROUPS             + "\";";
+		String sql_select_double_consonant_vowel_pairs = "SELECT * FROM reading_lessons WHERE sound_type=\"" + DOUBLE_CONSONANT_VOWEL_PAIRS + "\";";
+		String sql_select_double_vowel_consonant_pairs = "SELECT * FROM reading_lessons WHERE sound_type=\"" + DOUBLE_VOWEL_CONSONANT_PAIRS + "\";";
+		String sql_select_vowel_pairs                  = "SELECT * FROM reading_lessons WHERE sound_type=\"" + VOWEL_PAIRS                  + "\";";
+
+		String card_text = "card_text";
 		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, CONSONANT_PAIRS);
-		reading_deck.setConsonantPairs( cardListToStringList( list ) );
+		reading_deck.setConsonantPairs           ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_consonant_pairs,              card_text) );
+		reading_deck.setVowelConsonantPairs      ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_vowel_consonant_pairs,        card_text ) );
+		reading_deck.setConsonantGroups          ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_consonant_groups,             card_text ) );
+		reading_deck.setDoubleConsonantVowelPairs( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_double_consonant_vowel_pairs, card_text ) );
+		reading_deck.setDoubleVowelConsonantPairs( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_double_vowel_consonant_pairs, card_text ) );
+		reading_deck.setVowelPairs               ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_vowel_pairs,                  card_text ) );
 		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, VOWEL_CONSONANT_PAIRS);
-		reading_deck.setVowelConsonantPairs( cardListToStringList( list ) );
+		reading_deck.setWordsReadingLevel( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_words_reading_level, "reading_lesson_level" ) );
+		reading_deck.setWords    ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_words,     card_text ) );
+		reading_deck.setSentences( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_sentences, card_text ) );
 		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, CONSONANT_GROUPS);
-		reading_deck.setConsonantGroups( cardListToStringList( list ) );
+		try {
+			Statement stat = db_connection.createStatement();
 		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, DOUBLE_CONSONANT_VOWEL_PAIRS);
-		reading_deck.setDoubleConsonantVowelPairs( cardListToStringList( list ) );
-		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, DOUBLE_VOWEL_CONSONANT_PAIRS);
-		reading_deck.setDoubleVowelConsonantPairs( cardListToStringList( list ) );
-		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, VOWEL_PAIRS);
-		reading_deck.setVowelPairs( cardListToStringList( list ) );
-		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, WORDS);
-		reading_deck.setWords( cardListToStringList( list ) );
-		
-		list = CardDBManager.readDBGetGroup(db_file, deck_settings, SENTENCE);
-		if( list != null ) {
-			if( list.size() >= 1 ) {
-				reading_deck.setSentence( list.get(0).getContent(0) );
-			}
+			String sql_get_last_card_id = "SELECT max(card_id) FROM " + sqlite_table_name + ";";
+			ResultSet rs = stat.executeQuery( sql_get_last_card_id );
+			
+			int last_row_id = rs.getInt(1);
+			
+			String sql_select_max_level = "SELECT * FROM " + sqlite_table_name + " WHERE card_id=" + last_row_id + ";";
+
+			rs = stat.executeQuery( sql_select_max_level );
+			int reading_level = rs.getInt( "reading_lesson_level" );
+			reading_deck.setLevel( reading_level );
+		} catch ( SQLException e ) {
+			e.printStackTrace();
 		}
-		
+
 		return reading_deck;
 	}
-	
-	//public ArrayList<String> getContents() {
-	//	return this.contents;
-	//}
-
-	
-	public static void writeDB(File db_file, ReadingLessonCreator deck) {
-		// Make a list with all the database lines.
-		ArrayList<String> lines = getDatabaseOutput( deck );
-
-		// Try to open the database file to write to it.
-		try {
-			// Make/Open the file.
-			if (!db_file.exists()) {
-					try {
-						db_file.createNewFile();
-					} catch (IOException e) {
-						System.out.println("Couldn't make the file: " + db_file.getAbsolutePath());
-						e.printStackTrace();
-					}
-			}
-			
-			
-			FileWriter fw = new FileWriter( db_file, false );
-			BufferedWriter bw_new_db = new BufferedWriter( fw );
-			
-			// Write the data
-			for( int i = 0; i < lines.size(); i++ ) {
-				bw_new_db.write( lines.get(i) );
-				System.out.println("Writing to file: " + lines.get(i));
-				bw_new_db.newLine();
-			}
-			
-			bw_new_db.close();
-		}
-		// Catch for when the file isn't opened.
-		catch( Exception e ) {
-			System.out.println( "Could not find the database file: " + db_file );
-			System.out.println( "This is a try and catch exception, so the file might be ok!!!" );
-			System.out.println( "Try some debugging to see what the real problem is." );
-			e.printStackTrace();
-			System.exit(100);
-		}
-	}
-	//static {
-	//	HEADINGS.add( HEADING_CONSONANT_PAIRS              );
-	//	HEADINGS.add( HEADING_CONSONANT_GROUPS             );
-	//	HEADINGS.add( HEADING_VOWEL_CONSONANT_PAIRS        );
-	//	HEADINGS.add( HEADING_VOWEL_PAIRS                  );
-	//	HEADINGS.add( HEADING_DOUBLE_CONSONANT_VOWEL_PAIRS );
-	//	HEADINGS.add( HEADING_DOUBLE_VOWEL_CONSONANT_PAIRS );
-	//	HEADINGS.add( HEADING_WORDS                        );
-	//	HEADINGS.add( HEADING_SENTENCE                     );
-	//}
-	
-	//public TextEditorDBManager( File db_file ) {
-	//		this.db_file = db_file;
-	//		loadDBFile();
-	//}
-	
 	/**
 	 * Will get the word or sound from each card and make a List of Strings.
 	 * @param list
@@ -324,18 +237,13 @@ public class TextEditorDBManager {
 
 		lines.add("");
 		lines.add("");
-		lines.add( lineToDBGroupLine( TextEditorDBManager.WORDS ) );
+		lines.add( lineToDBGroupLine( TextEditorDBManager.WORD ) );
 		lines.addAll( TextEditorDBManager.listToDBLines( deck.getWords(), CardType.isWord, deck.getLevel() ) );
 
 		lines.add("");
 		lines.add("");
 		lines.add( lineToDBGroupLine( TextEditorDBManager.SENTENCE ) );
-		// Convert the sentence into a list and add it to the database.
-		// We convert to a list as I may add multiple sentences for a single reading lesson later on.
-		// Plus it keeps the code to format a line all in one function.
-		List<String> sentence_list = new ArrayList<String>();
-		sentence_list.add( deck.getSentence() );
-		lines.addAll(TextEditorDBManager.listToDBLines(sentence_list, CardType.isSentence, deck.getLevel() ));
+		lines.addAll(TextEditorDBManager.listToDBLines(deck.getSentences(), CardType.isSentence, deck.getLevel() ));
 		
 		return lines;
 	}

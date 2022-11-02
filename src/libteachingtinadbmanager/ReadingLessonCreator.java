@@ -31,7 +31,8 @@ public class ReadingLessonCreator {
 	List<String> double_consonant_vowel_pairs = new ArrayList<String>();
 	List<String> double_vowel_consonant_pairs = new ArrayList<String>();
 	List<String> words                        = new ArrayList<String>();
-	String sentence = "";
+	List<String> sentences                    = new ArrayList<String>();
+	List<Integer> words_reading_level         = new ArrayList<Integer>();
 
 	/**
 	 * This will parse the sentence passed, and will break it into
@@ -45,9 +46,12 @@ public class ReadingLessonCreator {
 	public ReadingLessonCreator( ReadingLessonCreator previous_lesson, String sentence ) {
 		setPreviousLesson ( previous_lesson );
 		List <String> words = SentenceAnalyzer.getWords ( sentence );
+		List <String> sentences = new ArrayList<String>();
+		sentences.add( sentence );
+
 
 		if( previous_lesson == null ) {
-			setSentence                 ( sentence );
+			setSentences                ( sentences );
 			setWords                    ( words );
 			setConsonantPairs           ( SentenceAnalyzer.getConsonantPairs           ( words ) );
 			setConsonantGroups          ( SentenceAnalyzer.getConsonantGroups          ( words ) );
@@ -61,7 +65,7 @@ public class ReadingLessonCreator {
 			 * Remove all duplicate words first, then AFTER that, find all vowel pairs,
 			 * consonant pairs, etc for our new words.
 			 */
-			setSentence                 ( sentence );
+			setSentences                ( sentences );
 			setWords                    ( words );
 			removePreviousLessonsWords();
 
@@ -80,6 +84,11 @@ public class ReadingLessonCreator {
 			removePreviousLessonsVowelPairs();
 			removePreviousLessonsDoubleConsonantVowelPairs();
 			removePreviousLessonsDoubleVowelConsonantPairs();
+		}
+
+		words_reading_level = new ArrayList<Integer>();
+		for( int i = 0; i< words.size(); i++ ) {
+			words_reading_level.add( getLevel() );
 		}
 	}
 	/**
@@ -119,14 +128,6 @@ public class ReadingLessonCreator {
 	}
 
 	public int getCurrentReadingLevel( List<String> list ) {
-		for( String i : list ) {
-			for( String k : getWords() ) {
-				if( i.compareToIgnoreCase( k ) == 0 ) {
-					return getLevel();
-				}
-				
-			}
-		}
 		if( this.prev_lesson == null ) {
 			return 0;
 		} else {
@@ -158,8 +159,8 @@ public class ReadingLessonCreator {
 	public List<String> getDoubleVowelConsonantPairs() {
 		return this.double_vowel_consonant_pairs;
 	}
-	public String getSentence() {
-		return this.sentence;
+	public List<String> getSentences() {
+		return this.sentences;
 	}
 	public List<String> getWords() {
 		return this.words;
@@ -179,6 +180,19 @@ public class ReadingLessonCreator {
 		}
 
 		return words;
+	}
+	
+	public List<Integer> getAllLessonsWordsReadingLevels() {
+		List<Integer> levels = new ArrayList<Integer>();
+		if( prev_lesson == null ) {
+			levels = words_reading_level;
+		}
+		else {
+			levels.addAll( this.prev_lesson.getAllLessonsWordsReadingLevels() );
+			levels.addAll( words_reading_level );
+		}
+
+		return levels;
 	}
 
 	//public List<String> getAllWords() {
@@ -222,11 +236,18 @@ public class ReadingLessonCreator {
 	public void setDoubleVowelConsonantPairs (List<String> list) {
 		this.double_vowel_consonant_pairs = list;
 	}
-	public void setSentence(String sentence) {
-		this.sentence = sentence;
+	public void setSentences( List<String> list ) {
+		this.sentences = list;
 	}
 	public void setWords(List<String> list) {
 		this.words = list;
+	}
+	public void setWordsReadingLevel(List<String> list) {
+		List<Integer> result_list = new ArrayList<Integer>();
+		for( String str_num : list ) {
+			result_list.add( Integer.parseInt(str_num) );
+		}
+		this.words_reading_level = result_list;
 	}
 
 
