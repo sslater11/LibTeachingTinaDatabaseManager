@@ -11,125 +11,71 @@ You should have received a copy of the GNU General Public License along with thi
 package libteachingtinadbmanager;
 
 import java.util.ArrayList;
-import java.io.File;
 
-/**
- * Extends FlashcardGroupDeck and adds some methods to get the question from the flashcard.
- * It's different, because the flashcard format has been changed.
- * Here's an example of the new DB File Layout.
- *     #spelling/reading	word/text	audio	image
- *     #15/02/2022	1.4	19:40:56	3	#WORD#	#spelling_mode#	dog	<audio:spell-dog.mp3><audio:spell-dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *     #15/02/2022	1.4	19:40:56	3	#WORD#	#reading_mode#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *
- *     Group	Words	15/02/2020	2.744	19:40:56	1
- *     15/02/2022	1.4	19:40:56	3	#WORD#	#spelling_mode#	dog	<audio:spell-dog.mp3><audio:spell-dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *     15/02/2022	1.4	19:40:56	3	#WORD#	#reading_mode#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *
- *     Group	Sentence	15/02/2020	2.744	19:40:56	1
- *     15/02/2022	1.4	19:40:56	3	#SENTENCE#	#sentence_mode#	this is a test	<audio:this-is-a-test.mp3>	<image:test.jpg>    <read-along-timing:timings.txt>
- *     15/02/2022	1.4	19:40:56	3	#SENTENCE#	#sentence_mode#	dog	<audio:dog.mp3><audio:dog2.mp3>	<image:dog.jpg><image:dog2.jpg>
- *
- *
- * The line is split to this order - spelling/reading	word/text	audio	image
- */
-public class ReadingLessonDeck extends FlashcardGroupDeck {
-    public ReadingLessonDeck(ArrayList<Card> d, File deck_file_path, DeckSettings s) {
-        super(d, deck_file_path, s);
+public class ReadingLessonDeck {
+    ArrayList<ReadingLessonCard> deck;
+    ArrayList<ReadingLessonCard> learnt_deck = new ArrayList<ReadingLessonCard>();
+    ReadingLessonRandomizedIndex deck_index;
+    boolean are_cards_removable = true;
+
+    public ReadingLessonDeck(ArrayList<ReadingLessonCard> deck) {
+        this.deck = deck;
+        deck_index = new ReadingLessonRandomizedIndex( deck, are_cards_removable );
     }
 
-    public static String IS_WORD     = "#WORD#";
-    public static String IS_SENTENCE = "#SENTENCE#";
-    public static String IS_SOUND    = "#SOUND#";
+    public ReadingLessonCard getCurrentCard() {
+        return deck.get( deck_index.getCurrent() );
+    }
 
-    public static String READING_MODE  = "#READING_MODE#";
-    public static String SPELLING_MODE = "#SPELLING_MODE#";
-    public static String SENTENCE_MODE = "#SENTENCE_MODE#";
+    public ArrayList<ReadingLessonCard> getLearntDeck() {
+        return learnt_deck;
+    }
 
-    public final static int INDEX_WORD_SOUND_OR_SENTENCE = 0;
-    public final static int INDEX_CARD_MODE              = 1;
-    public final static int INDEX_TEXT                   = 2;
-    public final static int INDEX_AUDIO                  = 3;
-    public final static int INDEX_IMAGE                  = 4;
-    public final static int INDEX_READ_ALONG_TIMINGS     = 5;
-
-    public static ArrayList<String> getCardText( Card c ) {
-        ArrayList<String> list = CardDBTagManager.makeStringAList( c.getContent(INDEX_TEXT) );
-        return list;
-    }
-    public static ArrayList<String> getCardImage( Card c ) {
-        ArrayList<String> list = CardDBTagManager.makeStringAList( c.getContent(INDEX_IMAGE) );
-        return list;
-    }
-    public static ArrayList<String> getCardAudio( Card c ) {
-        ArrayList<String> list = CardDBTagManager.makeStringAList( c.getContent(INDEX_AUDIO) );
-        return list;
-    }
-    public static ArrayList<String> getCardReadAlongTimings( Card c ) {
-        ArrayList<String> list = CardDBTagManager.makeStringAList( c.getContent(INDEX_READ_ALONG_TIMINGS) );
-        return list;
-    }
-    public static boolean isCardReadingMode( Card c) {
-        String current_mode = c.getContent( INDEX_CARD_MODE );
-        if( current_mode.compareToIgnoreCase( READING_MODE ) == 0 ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    public static boolean isCardSpellingMode( Card c) {
-        String current_mode = c.getContent( INDEX_CARD_MODE );
-        if( current_mode.compareToIgnoreCase( SPELLING_MODE ) == 0 ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    public static boolean isCardSentenceMode( Card c) {
-        String current_mode = c.getContent( INDEX_CARD_MODE  );
-        if( current_mode.compareToIgnoreCase( SENTENCE_MODE ) == 0 ) {
+    public boolean isLearnt() {
+        if( deck.size() == 0 )
+        {
             return true;
         } else {
             return false;
         }
     }
 
+    public void nextQuestion( boolean is_answer_correct, boolean stay_on_incorrect_card ) {
+        if( is_answer_correct ) {
+            // Mark it as successful.
+            getCurrentCard().success();
 
-    public static boolean isCardASentence( Card c) {
-        String current_mode = c.getContent( INDEX_WORD_SOUND_OR_SENTENCE );
-        if( current_mode.compareToIgnoreCase( IS_SENTENCE ) == 0 ) {
-            return true;
+            // Check if the card should be removed from the deck.
+            if( are_cards_removable ) {
+                // Remove the card.
+                // Check if the current card has been learnt, and move it to the learnt_deck.
+                if( getCurrentCard().isLearnt() ) {
+                    // Update the card's details, used for writing to the database.
+                    learnt_deck.add( getCurrentCard() );
+                    deck.remove( deck_index.getCurrent() );
+
+                    // Update the list of indexes, since we just removed a card
+                    deck_index.ResetList();
+                }
+            }
+
+            if( ! isLearnt() ) {
+                deck_index.getNext();
+            }
         } else {
-            return false;
+            // They got it wrong, so the card's success count has been reset to 0.
+            // Now there are more reviews needed, so reset the index list.
+            getCurrentCard().failed();
+            if( stay_on_incorrect_card ) {
+                deck_index.ResetListKeepFirstIndexSame();
+            } else {
+                deck_index.ResetList();
+            }
+        }
+
+        if( isLearnt() ) {
+            System.out.println("nextQuestion() has been called, and the deck has now been learnt.");
+            System.out.println("It was probably learnt during this last execution of it, so does that make this message meaningless?");
         }
     }
-
-    public static boolean isCardAWord( Card c) {
-        String current_mode = c.getContent( INDEX_WORD_SOUND_OR_SENTENCE );
-        if( current_mode.compareToIgnoreCase( IS_WORD ) == 0 ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static boolean isCardASound( Card c) {
-        String current_mode = c.getContent( INDEX_WORD_SOUND_OR_SENTENCE );
-        if( current_mode.compareToIgnoreCase( IS_SOUND ) == 0 ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    // Implement these 2 methods, but we should never use them, because our flashcards
-    // are more complex than a simple question and answer flashcard.
-    @Override
-    public ArrayList<String> getQuestion() {
-        return null;
-    }
-    @Override
-    public ArrayList<String> getAnswer() {
-        return null;
-    }
-
 }

@@ -21,16 +21,19 @@ import libteachingtinadbmanager.TextEditorDBManager;
 import libteachingtinadbmanager.WordWithIndexes;
 
 public class SQLiteReadingLessonHandler {
-	public static String TABLE_NAME             = "reading_lessons";
-	public static String CARD_ID                = "card_id";
-	public static String DATE_IN_MILLIS         = "date_in_millis";
-	public static String BOX_NUM                = "box_num";
-	public static String READING_LESSON_LEVEL   = "reading_lesson_level";
-	public static String SOUND_TYPE             = "sound_type";
-	public static String SOUND_WORD_OR_SENTENCE = "sound_word_or_sentence";
-	public static String ID_OF_LINKED_CARD      = "id_of_linked_card";
-	public static String IS_SPELLING_MODE       = "is_spelling_mode";
-	public static String CARD_TEXT              = "card_text";
+	public static String TABLE_NAME              = "reading_lessons";
+	public static String CARD_ID                 = "card_id";
+	public static String DATE_IN_MILLIS          = "date_in_millis";
+	public static String BOX_NUM                 = "box_num";
+	public static String READING_LESSON_LEVEL    = "reading_lesson_level";
+	public static String SOUND_TYPE              = "sound_type";
+	public static String SOUND_WORD_OR_SENTENCE  = "sound_word_or_sentence";
+	public static String ID_OF_LINKED_CARD       = "id_of_linked_card";
+	public static String IS_SPELLING_MODE        = "is_spelling_mode";
+	public static String CARD_TEXT               = "card_text";
+	public static String CARD_IMAGES             = "card_images";
+	public static String CARD_AUDIO              = "card_audio";
+	public static String CARD_READ_ALONG_TIMINGS = "card_read_along_timings";
 
 	public static void sqliteInsertCard(
 		Connection db_connection,
@@ -166,7 +169,7 @@ public class SQLiteReadingLessonHandler {
 
 		String card_images = "<image:\"" + sub_directory + filename + ".jpg\">";
 		String card_audio  = "<audio:\"" + sub_directory + filename + " - Sentence.wav\">";
-		String card_read_along_timings = "<read-along-timing:\"" + sub_directory + filename + ".timing\">";
+		String card_read_along_timings = null;
 
 		sqliteInsertCard(db_connection, sqlite_table_name,
 			-1, // Initial date in milliseconds set so the card will definitely be reviewed.

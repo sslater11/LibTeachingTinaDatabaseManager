@@ -293,11 +293,6 @@ public class ReadingLessonCreator {
 	}
 
 
-	public void printAllLessonContentsAsLessonFile() {
-		printList( TextEditorDBManager.getDatabaseOutput( this ) );
-	}
-
-
 	public static void printList(List<String> list) {
 		for( int i = 0; i < list.size(); i++ ) {
 			System.out.println( list.get(i) );

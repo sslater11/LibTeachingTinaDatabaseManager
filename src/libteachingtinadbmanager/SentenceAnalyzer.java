@@ -686,10 +686,6 @@ public abstract class SentenceAnalyzer {
 					words_with_indexes.add( new_word );
 				}
 			}
-
-			// move this to SenenceAnalyzer so that we can reuse the same code later on when we need to check the database for any missing media.
-			// it'll check if our sentence is missing any audio as it may parse it in an unexpected way and link to a file that doesn't exist.
-			// make sure it can handle apostrophes properly!
 		}
 
 		return words_with_indexes;
