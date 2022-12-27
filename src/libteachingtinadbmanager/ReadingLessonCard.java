@@ -18,7 +18,7 @@ import libteachingtinadbmanager.Card;
 public class ReadingLessonCard {
 	public static final int DEFAULT_SUCCESS_LIMIT = 5;
 	public static final float BOX_NUM_MULTIPLIER = (float) 1.4;
-	public static final int    DEFAULT_BOX_NUM = 1; /* when update() is run, all box numbers will be
+	public static final float    DEFAULT_BOX_NUM = 1.0f; /* when update() is run, all box numbers will be
 	 * multiplied by BOX_NUM_MULTIPILER, so the
 	 * default box number is really (1 * 1.4) = 1.4
 	 */
@@ -94,7 +94,6 @@ public class ReadingLessonCard {
 	}
 	public void failed() {
 		failed_count++;
-		box_num = DEFAULT_BOX_NUM;
 		successes_count = 0;
 	}
 
@@ -110,7 +109,7 @@ public class ReadingLessonCard {
 		}
 
 	}
-	public boolean isReviewNeeded(DeckSettings settings, String date, float box_num, String time, int daily_review_count) {
+	public boolean isReviewNeeded() {
 		// Add the box number to the day as days.
 		// This gives an easy review algorithm.
 		Date cards_date = new Date( date_in_millis );
@@ -128,6 +127,21 @@ public class ReadingLessonCard {
 	}
 	public boolean isASentence() {
 		if( this.sound_word_or_sentence.compareToIgnoreCase( "Sentence" ) == 0 ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean isASound() {
+		if( this.sound_word_or_sentence.compareToIgnoreCase( "Sound" ) == 0 ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	public boolean isAWord() {
+		if( this.sound_word_or_sentence.compareToIgnoreCase( "Word" ) == 0 ) {
 			return true;
 		} else {
 			return false;
@@ -215,7 +229,7 @@ public class ReadingLessonCard {
 				box_num = box_num * BOX_NUM_MULTIPLIER;
 			} else {
 				// Reset the card's box number
-				box_num = box_num * DEFAULT_BOX_NUM;
+				box_num = DEFAULT_BOX_NUM * BOX_NUM_MULTIPLIER;
 			}
 			// Reset the review date to today.
 			this.date_in_millis = date_in_millis;

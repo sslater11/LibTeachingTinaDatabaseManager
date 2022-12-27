@@ -23,6 +23,14 @@ public class ReadingLessonDeck {
         deck_index = new ReadingLessonRandomizedIndex( deck, are_cards_removable );
     }
 
+    public int countCardsLeftToStudy() {
+        int total_reviews_left = 0;
+        for( int i = 0; i < deck.size(); i++ ) {
+            total_reviews_left += deck.get(i).getCardsRepeatCount();
+        }
+
+        return total_reviews_left;
+    }
     public ReadingLessonCard getCurrentCard() {
         return deck.get( deck_index.getCurrent() );
     }
@@ -77,5 +85,9 @@ public class ReadingLessonDeck {
             System.out.println("nextQuestion() has been called, and the deck has now been learnt.");
             System.out.println("It was probably learnt during this last execution of it, so does that make this message meaningless?");
         }
+    }
+
+    public int size() {
+        return deck.size();
     }
 }
