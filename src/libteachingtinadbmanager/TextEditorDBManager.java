@@ -93,7 +93,7 @@ public class TextEditorDBManager {
 		String card_text = "card_text";
 		
 		reading_deck.setConsonantPairs           ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_consonant_pairs,              card_text) );
-		reading_deck.setVowelConsonantPairs      ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_vowel_consonant_pairs,        card_text ) );
+		reading_deck.setVowelConsonantPairs1D    ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_vowel_consonant_pairs,        card_text ) );
 		reading_deck.setConsonantGroups          ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_consonant_groups,             card_text ) );
 		reading_deck.setDoubleConsonantVowelPairs( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_double_consonant_vowel_pairs, card_text ) );
 		reading_deck.setDoubleVowelConsonantPairs( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_double_vowel_consonant_pairs, card_text ) );

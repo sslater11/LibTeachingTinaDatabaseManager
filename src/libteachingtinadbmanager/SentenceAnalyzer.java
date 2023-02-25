@@ -111,8 +111,8 @@ public abstract class SentenceAnalyzer {
 	 * @param words
 	 * @return
 	 */
-	public static List<String> getVowelConsonantPairs(List<String> words) {
-		List<String> pairs = new ArrayList<String>();
+	public static List<String[]> getVowelConsonantPairs(List<String> words) {
+		List<String[]> pairs = new ArrayList<String[]>();
 
 		for(int i = 0; i < words.size(); i++ ) {
 			String str = words.get(i);
@@ -124,15 +124,14 @@ public abstract class SentenceAnalyzer {
 	
 					if( isVowelConsonantPair( new_pair ) ) {
 						String reverse = new StringBuilder(new_pair).reverse().toString();
-						
-						pairs.add( new_pair );
-						pairs.add( reverse );
+						String[] joined = new String[] {new_pair, reverse };
+						pairs.add( joined );
 					}
 				}
 			}
 		}
 		
-		return removeDuplicatesFromList(pairs);
+		return removeDuplicatesFromVowelConsonantList( pairs );
 	}
 	
 //	public static List<String> getVowelPairs(String str) {
@@ -512,6 +511,23 @@ public abstract class SentenceAnalyzer {
 					list.remove(k);
 					k = i;
 					//k--;
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	public static List<String[]> removeDuplicatesFromVowelConsonantList( List<String[]> list ) {		
+		for( int i = 0; i < list.size(); i++ ) {
+			for( int k = i+1; k < list.size(); k++ ) {
+				for( String str_one : list.get(i) ) {
+					for( String str_two : list.get(k) ) {
+						if( str_one.compareToIgnoreCase(str_two) == 0 ) {
+							list.remove(k);
+							k = i;
+						}
+					}
 				}
 			}
 		}

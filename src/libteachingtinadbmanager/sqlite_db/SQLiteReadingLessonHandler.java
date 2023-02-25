@@ -119,6 +119,61 @@ public class SQLiteReadingLessonHandler {
 		return list;
 	}
 
+	/** 
+	 * We pass the 2 connected sounds like "ab,ba" as an array {"ab","ba"}, and it will add them to the SQLite database and link their "id_of_linked_card" field.
+	 * @param db_connection
+	 * @param sqlite_table_name
+	 * @param reading_level
+	 * @param card_text
+	 * @param sound_type
+	 */
+	public static void sqliteInsertVowelConsonantSound( Connection db_connection, String sqlite_table_name, int reading_level, String card_text[], String sound_type ) {
+		if( card_text.length == 2 ) {
+			// If there's 2 sounds, insert both
+			sqliteInsertSound( db_connection, sqlite_table_name, reading_level, card_text[0], sound_type );
+			sqliteInsertSound( db_connection, sqlite_table_name, reading_level, card_text[1], sound_type );
+			
+			// Find out each card's "card_id".
+			int card_id_1 = -1;
+			int card_id_2 = -1;
+			try {
+				String sql_query_1 = "SELECT * FROM " + SQLiteReadingLessonHandler.TABLE_NAME + " WHERE card_text=\"" + card_text[0] + "\" AND sound_type=\"" + sound_type + "\";";
+				String sql_query_2 = "SELECT * FROM " + SQLiteReadingLessonHandler.TABLE_NAME + " WHERE card_text=\"" + card_text[1] + "\" AND sound_type=\"" + sound_type + "\";";
+				Statement stat;
+				ResultSet rs;
+				stat = db_connection.createStatement();
+				rs = stat.executeQuery( sql_query_1 );
+				card_id_1 = rs.getInt( "card_id" );
+				rs = stat.executeQuery( sql_query_2 );
+				card_id_2 = rs.getInt( "card_id" );
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			
+			// Update each SQL Line so each card's "id_of_linked_card" is linked to the other card.
+			String sql_update = "UPDATE " + SQLiteReadingLessonHandler.TABLE_NAME + " SET id_of_linked_card=? WHERE card_id=?;";
+			PreparedStatement prep;
+			try {
+				prep = db_connection.prepareStatement( sql_update );
+				prep.setString(1, card_id_2 + "" );
+				prep.setString(2, card_id_1 + "" );
+				prep.executeUpdate();
+				
+				prep = db_connection.prepareStatement( sql_update );
+				prep.setString(1, card_id_1 + "" );
+				prep.setString(2, card_id_2 + "" );
+				prep.executeUpdate();
+			} catch ( SQLException e ) {
+				e.printStackTrace();
+			}
+
+		} else if( card_text.length == 1 ) {
+			sqliteInsertSound( db_connection, sqlite_table_name, reading_level, card_text[0], sound_type );
+		}
+	}
+	
 	public static void sqliteInsertSound( Connection db_connection, String sqlite_table_name, int reading_level, String card_text, String sound_type ) {
 		String text_with_ignored_characters_removed = (new WordWithIndexes( card_text, 0, card_text.length() )).getWordWithIgnoredCharactersRemoved();
 		String sub_directory = "sounds/";
@@ -190,7 +245,13 @@ public class SQLiteReadingLessonHandler {
 		for( int i = 0; i < list.size(); i++ ) {
 			sqliteInsertSound( db_connection, sqlite_table_name, reading_level, list.get(i), sound_type );
 		}
-		
+	}
+
+	public static void sqliteInsertSoundVowelConsonantList( Connection db_connection, String sqlite_table_name, int reading_level, List<String[]> list, String sound_type ) {
+		for( int i = 0; i < list.size(); i++ ) {
+			sqliteInsertVowelConsonantSound( db_connection, sqlite_table_name, reading_level, list.get(i), sound_type );
+		}
+
 	}
 	public static void writeToSQLiteDB( Connection db_connection, String sqlite_table_name, ReadingLessonCreator deck)
 	{
@@ -200,7 +261,7 @@ public class SQLiteReadingLessonHandler {
 		sqliteInsertSoundList( db_connection, sqlite_table_name, deck.getLevel(), deck.getConsonantPairs(), TextEditorDBManager.CONSONANT_PAIRS );
 		sqliteInsertSoundList( db_connection, sqlite_table_name, deck.getLevel(), deck.getConsonantGroups(), TextEditorDBManager.CONSONANT_GROUPS );
 		sqliteInsertSoundList( db_connection, sqlite_table_name, deck.getLevel(), deck.getVowelPairs(), TextEditorDBManager.VOWEL_PAIRS );
-		sqliteInsertSoundList( db_connection, sqlite_table_name, deck.getLevel(), deck.getVowelConsonantPairs(), TextEditorDBManager.VOWEL_CONSONANT_PAIRS );
+		sqliteInsertSoundVowelConsonantList( db_connection, sqlite_table_name, deck.getLevel(), deck.getVowelConsonantPairs(), TextEditorDBManager.VOWEL_CONSONANT_PAIRS );
 		sqliteInsertSoundList( db_connection, sqlite_table_name, deck.getLevel(), deck.getDoubleConsonantVowelPairs(), TextEditorDBManager.DOUBLE_CONSONANT_VOWEL_PAIRS );
 		sqliteInsertSoundList( db_connection, sqlite_table_name, deck.getLevel(), deck.getDoubleVowelConsonantPairs(), TextEditorDBManager.DOUBLE_VOWEL_CONSONANT_PAIRS );
 

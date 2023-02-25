@@ -26,7 +26,8 @@ public class ReadingLessonCreator {
 
 	List<String> consonant_pairs              = new ArrayList<String>();
 	List<String> consonant_groups             = new ArrayList<String>();
-	List<String> vowel_consonant_pairs        = new ArrayList<String>();
+	// store an array of strings for the grouped sounds like 'ab,ba' and 'on,no'
+	List<String[]> vowel_consonant_pairs        = new ArrayList<String[]>();
 	List<String> vowel_pairs                  = new ArrayList<String>();
 	List<String> double_consonant_vowel_pairs = new ArrayList<String>();
 	List<String> double_vowel_consonant_pairs = new ArrayList<String>();
@@ -55,7 +56,7 @@ public class ReadingLessonCreator {
 			setWords                    ( words );
 			setConsonantPairs           ( SentenceAnalyzer.getConsonantPairs           ( words ) );
 			setConsonantGroups          ( SentenceAnalyzer.getConsonantGroups          ( words ) );
-			setVowelConsonantPairs      ( SentenceAnalyzer.getVowelConsonantPairs      ( words ) );
+			setVowelConsonantPairs2D    ( SentenceAnalyzer.getVowelConsonantPairs      ( words ) );
 			setVowelPairs               ( SentenceAnalyzer.getVowelPairs               ( words ) );
 			setDoubleConsonantVowelPairs( SentenceAnalyzer.getDoubleConsonantVowelPairs( words ) );
 			setDoubleVowelConsonantPairs( SentenceAnalyzer.getDoubleVowelConsonantPairs( words ) );
@@ -71,7 +72,7 @@ public class ReadingLessonCreator {
 
 			setConsonantPairs           ( SentenceAnalyzer.getConsonantPairs           ( getWords() ) );
 			setConsonantGroups          ( SentenceAnalyzer.getConsonantGroups          ( getWords() ) );
-			setVowelConsonantPairs      ( SentenceAnalyzer.getVowelConsonantPairs      ( getWords() ) );
+			setVowelConsonantPairs2D    ( SentenceAnalyzer.getVowelConsonantPairs      ( getWords() ) );
 			setVowelPairs               ( SentenceAnalyzer.getVowelPairs               ( getWords() ) );
 			setDoubleConsonantVowelPairs( SentenceAnalyzer.getDoubleConsonantVowelPairs( getWords() ) );
 			setDoubleVowelConsonantPairs( SentenceAnalyzer.getDoubleVowelConsonantPairs( getWords() ) );
@@ -150,7 +151,7 @@ public class ReadingLessonCreator {
 	public List<String> getVowelPairs() {
 		return this.vowel_pairs;
 	}
-	public List<String> getVowelConsonantPairs () {
+	public List<String[]> getVowelConsonantPairs () {
 		return this.vowel_consonant_pairs;
 	}
 	public List<String> getDoubleConsonantVowelPairs() {
@@ -227,7 +228,14 @@ public class ReadingLessonCreator {
 	public void setVowelPairs(List<String> list) {
 		vowel_pairs = list;
 	}
-	public void setVowelConsonantPairs (List<String> list) {
+	public void setVowelConsonantPairs1D (List<String> list) {
+		List<String[]> result_list = new ArrayList<String[]>();
+		for( String str : list ) {
+			result_list.add( new String[] { str } );
+		}
+		this.vowel_consonant_pairs = result_list;
+	}
+	public void setVowelConsonantPairs2D (List<String[]> list) {
 		this.vowel_consonant_pairs = list;
 	}
 	public void setDoubleConsonantVowelPairs (List<String> list) {
@@ -352,7 +360,7 @@ public class ReadingLessonCreator {
 		ReadingLessonCreator previous_lesson = getPreviousLesson();
 
 		while( previous_lesson != null ) {
-			setVowelConsonantPairs( removeDuplicatesFromList(previous_lesson.getVowelConsonantPairs(), this.getVowelConsonantPairs()) );
+			setVowelConsonantPairs2D( removeDuplicatesFromVowelConsonantList(previous_lesson.getVowelConsonantPairs(), this.getVowelConsonantPairs()) );
 			previous_lesson = previous_lesson.getPreviousLesson();
 		}
 	}
@@ -397,6 +405,31 @@ public class ReadingLessonCreator {
 				if( str_a.compareToIgnoreCase(str_b) == 0 ) {
 					list_b.remove( b );
 					b--;
+				}
+			}
+		}
+		return list_b;
+	}
+	/**
+	 * Will remove list_a duplicates from list_b
+	 * @param list_a
+	 * @param list_b
+	 * @return returns a cut down version of list_b
+	 */
+	public static List<String[]> removeDuplicatesFromVowelConsonantList( List<String[]> list_a, List<String[]> list_b ) {
+		for( int a = 0; a < list_a.size(); a++ ) {
+			for( int b = 0; b < list_b.size(); b++ ) {
+				String[] str_a = list_a.get(a);
+				String[] str_b = list_b.get(b);
+
+				
+				for( String str_one : str_a ) {
+					for( String str_two : str_b ) {
+						if( str_one.compareToIgnoreCase(str_two) == 0 ) {
+							list_b.remove(b);
+							b--;
+						}
+					}
 				}
 			}
 		}
