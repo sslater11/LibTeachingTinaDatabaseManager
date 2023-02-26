@@ -115,7 +115,7 @@ public abstract class SentenceAnalyzer {
 		List<String[]> pairs = new ArrayList<String[]>();
 
 		for(int i = 0; i < words.size(); i++ ) {
-			String str = words.get(i);
+			String str = words.get(i).toLowerCase();
 
 			if( str.length() > 1 ) {
 				for ( int k = 1; k < str.length(); k++ ) {
@@ -148,7 +148,7 @@ public abstract class SentenceAnalyzer {
 		List<String> pairs = new ArrayList<String>();
 
 		for(int i = 0; i < words.size(); i++ ) {
-			String str = words.get(i);
+			String str = words.get(i).toLowerCase();
 			
 			if( str.length() > 1 ) {
 				for ( int k = 1; k < str.length(); k++ ) {
@@ -181,7 +181,7 @@ public abstract class SentenceAnalyzer {
 		List<String> groups = new ArrayList<String>();
 		
 		for(int i = 0; i < words.size(); i++ ) {
-			String str = words.get(i);
+			String str = words.get(i).toLowerCase();
 			String new_group = "";
 			
 			// So the loop below will look for a group of consonants, and it will add
@@ -231,7 +231,7 @@ public abstract class SentenceAnalyzer {
 		List<String> pairs  = new ArrayList<String>();
 		
 		for(int i = 0; i < words.size(); i++ ){
-			String str = words.get(i);
+			String str = words.get(i).toLowerCase();
 			String new_pair = "";
 			
 			
@@ -294,7 +294,7 @@ public abstract class SentenceAnalyzer {
 		List<String> pairs  = new ArrayList<String>();
 		
 		for(int i = 0; i < words.size(); i++ ){
-			String str = words.get(i);
+			String str = words.get(i).toLowerCase();
 			String new_pair = "";
 			// Hack:
 			// I put a vowel on the end of the word, so it will always hit a vowel at the
@@ -400,7 +400,7 @@ public abstract class SentenceAnalyzer {
 		List<String> pairs  = new ArrayList<String>();
 		
 		for(int i = 0; i < words.size(); i++ ){
-			String str = words.get(i);
+			String str = words.get(i).toLowerCase();
 			String new_pair = "";
 			// Hack:
 			// I put a vowel on the end of the word, so it will always hit a consonant at the

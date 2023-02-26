@@ -197,7 +197,7 @@ public class SQLiteReadingLessonHandler {
 	}
 	
 	public static void sqliteInsertWord( Connection db_connection, String sqlite_table_name, int reading_level, String card_text ) {
-		String text_with_ignored_characters_removed = (new WordWithIndexes( card_text, 0, card_text.length() )).getWordWithIgnoredCharactersRemoved();
+		String text_with_ignored_characters_removed = (new WordWithIndexes( card_text, 0, card_text.length() )).getWordWithIgnoredCharactersRemoved().toLowerCase();
 		String sub_directory = "words/";
 		String card_images = "<image:\"" + sub_directory + text_with_ignored_characters_removed + ".jpg\">";
 		String card_audio  = "<audio:\"" + sub_directory + text_with_ignored_characters_removed + ".wav\">";
