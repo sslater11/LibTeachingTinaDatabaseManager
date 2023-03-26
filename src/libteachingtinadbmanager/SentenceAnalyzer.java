@@ -665,12 +665,19 @@ public abstract class SentenceAnalyzer {
 		boolean found_word = false;
 		for( int i = 0; i <= sentence.length(); i++ ) {
 			if( i == sentence.length() ) {
-			    // We've gone past the last character, so add the last string to the list.
-				String str = sentence.substring( starting_index, ending_index );
-				WordWithIndexes new_word = new WordWithIndexes( str, starting_index, ending_index );
+				// We've gone past the last character, so add the last string to the list,
+				// if we have not added it already.
+				if( found_word ) {
+					// We've reached the end of the word so store our results.
+					found_word = false;
 
-				words_with_indexes.add( new_word );
-				break;
+					String str = sentence.substring( starting_index, ending_index );
+					WordWithIndexes new_word = new WordWithIndexes( str, starting_index, ending_index );
+
+					words_with_indexes.add( new_word );
+				}
+
+			break;
 			}
 			char letter = sentence.charAt( i );
 			if( found_word == false ) {
