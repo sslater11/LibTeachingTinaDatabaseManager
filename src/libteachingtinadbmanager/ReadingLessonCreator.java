@@ -32,6 +32,7 @@ public class ReadingLessonCreator {
 	List<String> double_consonant_vowel_pairs = new ArrayList<String>();
 	List<String> double_vowel_consonant_pairs = new ArrayList<String>();
 	List<String> words                        = new ArrayList<String>();
+	List<String> word_spellings               = new ArrayList<String>();
 	List<String> sentences                    = new ArrayList<String>();
 	List<Integer> words_reading_level         = new ArrayList<Integer>();
 
@@ -166,6 +167,9 @@ public class ReadingLessonCreator {
 	public List<String> getWords() {
 		return this.words;
 	}
+	public List<String> getWordSpellings() {
+		return this.word_spellings;
+	}
 	/**
 	 * Will get all the words from this lesson, and all the lessons before it.
 	 * @return
@@ -246,6 +250,9 @@ public class ReadingLessonCreator {
 	}
 	public void setSentences( List<String> list ) {
 		this.sentences = list;
+	}
+	public void setWordSpellings(List<String> list) {
+		this.word_spellings = list;
 	}
 	public void setWords(List<String> list) {
 		this.words = list;

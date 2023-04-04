@@ -81,7 +81,8 @@ public class TextEditorDBManager {
 		ReadingLessonCreator reading_deck = new ReadingLessonCreator();
 		
 		String sql_select_sentences           = "SELECT * FROM reading_lessons WHERE sound_word_or_sentence=\"" + SENTENCE + "\";";
-		String sql_select_words               = "SELECT * FROM reading_lessons WHERE sound_word_or_sentence=\"" + WORD     + "\";";
+		String sql_select_words               = "SELECT * FROM reading_lessons WHERE sound_word_or_sentence=\"" + WORD     + "\" AND is_spelling_mode=0;";
+		String sql_select_word_spellings      = "SELECT * FROM reading_lessons WHERE sound_word_or_sentence=\"" + WORD     + "\" AND is_spelling_mode=1;";
 		String sql_select_words_reading_level = "SELECT reading_lesson_level FROM reading_lessons WHERE sound_word_or_sentence=\"" + WORD     + "\";";
 		String sql_select_consonant_pairs              = "SELECT * FROM reading_lessons WHERE sound_type=\"" + CONSONANT_PAIRS              + "\";";
 		String sql_select_vowel_consonant_pairs        = "SELECT * FROM reading_lessons WHERE sound_type=\"" + VOWEL_CONSONANT_PAIRS        + "\";";
@@ -100,7 +101,8 @@ public class TextEditorDBManager {
 		reading_deck.setVowelPairs               ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_vowel_pairs,                  card_text ) );
 		
 		reading_deck.setWordsReadingLevel( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_words_reading_level, "reading_lesson_level" ) );
-		reading_deck.setWords    ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_words,     card_text ) );
+		reading_deck.setWords        ( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_words,              card_text ) );
+		reading_deck.setWordSpellings( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_word_spellings,     card_text ) );
 		reading_deck.setSentences( SQLiteReadingLessonHandler.sqliteQueryToList( db_connection, sql_select_sentences, card_text ) );
 		
 		try {

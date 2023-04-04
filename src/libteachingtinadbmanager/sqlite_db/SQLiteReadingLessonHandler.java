@@ -35,7 +35,10 @@ public class SQLiteReadingLessonHandler {
 	public static String CARD_AUDIO              = "card_audio";
 	public static String CARD_READ_ALONG_TIMINGS = "card_read_along_timings";
 
-	public static void sqliteInsertCard(
+	/**
+	 * Returns the card_id for the inserted card.
+	 */
+	public static int sqliteInsertCard(
 		Connection db_connection,
 		String sqlite_table_name,
 		long date_in_millis,
@@ -96,8 +99,23 @@ public class SQLiteReadingLessonHandler {
 			prep.setString(10, card_audio );
 			prep.setString(11, card_read_along_timings );
 			prep.executeUpdate();
+			
+			// Get the card_id from the last inserted card and return it.
+			ResultSet rs = prep.getGeneratedKeys();
+			if( rs.next() )
+			{
+				int card_id = rs.getInt( 1 );
+				return card_id;
+			}
+			else {
+				System.out.println("Error with the ResultSet, no generated keys." );
+				return -1;
+			}
+
 		} catch ( SQLException e ) {
 			e.printStackTrace();
+			System.out.println("Error with creating a new flashcard." );
+			return -1;
 		}
 	}
 
@@ -196,21 +214,33 @@ public class SQLiteReadingLessonHandler {
 		);
 	}
 	
-	public static void sqliteInsertWord( Connection db_connection, String sqlite_table_name, int reading_level, String card_text ) {
+	public static int sqliteInsertWord( Connection db_connection, String sqlite_table_name, int reading_level, String card_text, boolean is_spelling_mode) {
+		return sqliteInsertWord( db_connection, sqlite_table_name, 0 , reading_level, card_text, is_spelling_mode);
+	}
+
+	/**
+	 * Returns the card_id for the inserted word.
+	 * @param db_connection
+	 * @param sqlite_table_name
+	 * @param reading_level
+	 * @param card_text
+	 * @return
+	 */
+	public static int sqliteInsertWord( Connection db_connection, String sqlite_table_name, int id_of_linked_card, int reading_level, String card_text, boolean is_spelling_mode ) {
 		String text_with_ignored_characters_removed = (new WordWithIndexes( card_text, 0, card_text.length() )).getWordWithIgnoredCharactersRemoved().toLowerCase();
 		String sub_directory = "words/";
 		String card_images = "<image:\"" + sub_directory + text_with_ignored_characters_removed + ".jpg\">";
 		String card_audio  = "<audio:\"" + sub_directory + text_with_ignored_characters_removed + ".wav\">";
 		String card_read_along_timings = "";
 
-		sqliteInsertCard(db_connection, sqlite_table_name,
+		return sqliteInsertCard(db_connection, sqlite_table_name,
 			-1, // Initial date in milliseconds set so the card will definitely be reviewed.
 			1, // box num
 			reading_level, // reading lesson level
 			null, // sound type, consonsant pairs, vowel pairs, etc.
 			TextEditorDBManager.WORD, // sound, word, or sentence
-			0, // ID of linked card
-			false, // is it spelling mode
+			id_of_linked_card, // ID of linked card
+			is_spelling_mode, // is it spelling of reading mode
 			card_text, // card's text
 			card_images,
 			card_audio,
@@ -267,7 +297,16 @@ public class SQLiteReadingLessonHandler {
 
 		list = deck.getWords();
 		for( int i = 0; i < list.size(); i++ ) {
-			sqliteInsertWord( db_connection, sqlite_table_name, deck.getLevel(), list.get(i) );
+			// Insert the reading word and get the newly inserted card's card_id.
+			boolean is_spelling_mode = false;
+			int reading_card_id = sqliteInsertWord( db_connection, sqlite_table_name,                   deck.getLevel(), list.get(i), is_spelling_mode );
+
+			// Insert the spelling word and get the newly inserted card's card_id.
+			is_spelling_mode = true;
+			int spelling_card_id = sqliteInsertWord( db_connection, sqlite_table_name, reading_card_id, deck.getLevel(), list.get(i), is_spelling_mode );
+
+			// Update the reading word's id_of_linked_card
+			updateLinkedCardID(db_connection, reading_card_id, spelling_card_id);
 		}
 
 		list = deck.getSentences();
